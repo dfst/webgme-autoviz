@@ -1,0 +1,16 @@
+{
+  "components": {
+    "visualizers": {
+      "AutoViz": {
+        "src": "panels/AutoViz/AutoVizPanel",
+        "title": "AutoViz",
+        "panel": "src/visualizers/panels/AutoViz",
+        "secondary": false,
+        "widget": "src/visualizers/widgets/AutoViz"
+      }
+    }
+  },
+  "dependencies": {
+    "visualizers": {}
+  }
+}

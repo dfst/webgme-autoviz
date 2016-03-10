@@ -1,0 +1,8 @@
+[
+  {
+    "id": "AutoViz",
+    "title": "AutoViz",
+    "panel": "panels/AutoViz/AutoVizPanel",
+    "DEBUG_ONLY": false
+  }
+]
