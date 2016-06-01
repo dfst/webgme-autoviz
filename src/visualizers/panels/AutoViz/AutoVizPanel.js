@@ -34,6 +34,8 @@ define([
     AutoVizPanel = function (layoutManager, params) {
         this._layoutManager = layoutManager;
         this._params = params;
+        // Add setting for embedded behavior
+        this._params.embedded = true;
 
         this._activePanel = null;
         this._activePanelId = null;
@@ -82,10 +84,15 @@ define([
             panelIndex = this._defaultPanelIndex;
         }
 
-        this.setPanel(VisualizersJSON[panelIndex]);
+        this.setPanel(VisualizersJSON[panelIndex], () => {
+            if (this._activePanel.control &&
+                this._activePanel.control.selectedObjectChanged) {
+                this._activePanel.control.selectedObjectChanged(this.currentNode.getId());
+            }
+        });
     };
 
-    AutoVizPanel.prototype.setPanel = function(panelDesc) {
+    AutoVizPanel.prototype.setPanel = function(panelDesc, cb) {
         var panel,
             self = this,
             containerSize;
@@ -102,6 +109,7 @@ define([
             }
             self._layoutManager.addPanel('activePanel', panel, 'center');
             self._activePanel = panel;
+            cb();
         });
 
         this._activePanelId = panelDesc.id;
@@ -117,7 +125,6 @@ define([
                 var nodeId = self.currentNode.getId(),
                     panel = new PanelClass(self._layoutManager, self._params);
 
-                WebGMEGlobal.State.trigger('change:' + CONSTANTS.STATE_ACTIVE_OBJECT, WebGMEGlobal.State, nodeId);
                 callback(panel);
             },
             function(err) {
