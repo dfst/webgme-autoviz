@@ -42,6 +42,7 @@ define([
         this.currentNode = null;
         this._panels = {};
 
+        this._territoryId = null;
         this._client = params.client;
         PanelBase.call(this, params);
 
@@ -52,7 +53,8 @@ define([
     };
 
     AutoVizPanel.prototype._initialize = function() {
-        WebGMEGlobal.State.on('change:' + CONSTANTS.STATE_ACTIVE_OBJECT, this.onActiveObjectChanged.bind(this));
+        WebGMEGlobal.State.on('change:' + CONSTANTS.STATE_ACTIVE_OBJECT,
+            (model, id) => this.selectedObjectChanged(id));
 
         this._defaultPanelIndex = 0;
         for (var i = VisualizersJSON.length; i--;) {
@@ -62,10 +64,30 @@ define([
         }
     };
 
-    AutoVizPanel.prototype.onActiveObjectChanged = function(model, nodeId) {
-        if (!this.currentNode || this.currentNode.getId() !== nodeId) {
-            this.currentNode = this._client.getNode(nodeId);
-            this.update();
+    AutoVizPanel.prototype.TERRITORY_RULE = {children: 0};
+    AutoVizPanel.prototype.selectedObjectChanged = function(nodeId) {
+        if (this._territoryId) {
+            this._client.removeUI(this._territoryId);
+        }
+
+        this._territoryId = this._client.addUI(this, events => {
+            this._eventCallback(events);
+        });
+
+        this._selfPatterns = {};
+        this._selfPatterns[nodeId] = this.TERRITORY_RULE;
+        this._client.updateTerritory(this._territoryId, this._selfPatterns);
+    };
+
+    AutoVizPanel.prototype._eventCallback = function(events) {
+        var event = events.find(e => e.etype === CONSTANTS.TERRITORY_EVENT_LOAD),
+            currentId = event ? event.eid : null;
+
+        if (event) {
+            if (!this.currentNode || this.currentNode.getId() !== currentId) {
+                this.currentNode = this._client.getNode(currentId);
+                this.update();
+            }
         }
     };
 
