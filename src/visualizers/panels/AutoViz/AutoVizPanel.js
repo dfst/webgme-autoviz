@@ -70,21 +70,26 @@ define([
             this._client.removeUI(this._territoryId);
         }
 
-        this._territoryId = this._client.addUI(this, events => {
-            this._eventCallback(events);
-        });
+        if (typeof nodeId === 'string') {
+            this._territoryId = this._client.addUI(this, events => {
+                this._eventCallback(events);
+            });
+            this.logger.debug(`AutoViz current territory id is ${this._territoryId}`);
 
-        this._selfPatterns = {};
-        this._selfPatterns[nodeId] = this.TERRITORY_RULE;
-        this._client.updateTerritory(this._territoryId, this._selfPatterns);
+            this._selfPatterns = {};
+            this._selfPatterns[nodeId] = this.TERRITORY_RULE;
+            this._client.updateTerritory(this._territoryId, this._selfPatterns);
+        }
     };
 
     AutoVizPanel.prototype._eventCallback = function(events) {
         var event = events.find(e => e.etype === CONSTANTS.TERRITORY_EVENT_LOAD),
-            currentId = event ? event.eid : null;
+            currentId = event ? event.eid : null,
+            newNode;
 
         if (event) {
-            if (!this.currentNode || this.currentNode.getId() !== currentId) {
+            newNode = this._client.getNode(currentId);
+            if (!this.currentNode || this.currentNode !== newNode) {
                 this.currentNode = this._client.getNode(currentId);
                 this.update();
             }
@@ -156,26 +161,42 @@ define([
         }
     };
 
+    AutoVizPanel.prototype._forwardFn = function(fn, args) {
+        if (this._activePanel) {
+            return this._activePanel[fn].apply(this._activePanel, args);
+        }
+    };
+
     _.extend(AutoVizPanel.prototype, PanelBase.prototype);
 
     // Pass through functions
-    var FWRD_FUNCS = [
-        'setSize',
-        'destroy',
-        'clear',
-        'setReadOnly',
-        'isReadOnly',
-        'onReadOnlyChanged',
-        'afterAppend'
-    ];
+    AutoVizPanel.prototype.setSize = function() {
+        return this._forwardFn.call(this, 'setSize', arguments);
+    };
 
-    for (var i = FWRD_FUNCS.length; i--;) {
-        AutoVizPanel.prototype[FWRD_FUNCS[i]] = function() {
-            if (this._activePanel) {
-                return this._activePanel[FWRD_FUNCS[i]].apply(this._activePanel, arguments);
-            }
-        };
-    }
+    AutoVizPanel.prototype.destroy = function() {
+        return this._forwardFn.call(this, 'destroy', arguments);
+    };
+
+    AutoVizPanel.prototype.clear = function() {
+        return this._forwardFn.call(this, 'clear', arguments);
+    };
+
+    AutoVizPanel.prototype.setReadOnly = function() {
+        return this._forwardFn.call(this, 'setReadOnly', arguments);
+    };
+
+    AutoVizPanel.prototype.isReadOnly = function() {
+        return this._forwardFn.call(this, 'isReadOnly', arguments);
+    };
+
+    AutoVizPanel.prototype.onReadOnlyChanged = function() {
+        return this._forwardFn.call(this, 'onReadOnlyChanged', arguments);
+    };
+
+    AutoVizPanel.prototype.afterAppend = function() {
+        return this._forwardFn.call(this, 'afterAppend', arguments);
+    };
 
     return AutoVizPanel;
 });
