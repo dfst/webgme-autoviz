@@ -90,7 +90,7 @@ define([
         if (event) {
             newNode = this._client.getNode(currentId);
             if (!this.currentNode || this.currentNode !== newNode) {
-                this.currentNode = this._client.getNode(currentId);
+                this.currentNode = newNode;
                 this.update();
             }
         }
@@ -125,7 +125,7 @@ define([
             containerSize;
 
         if (this._activePanelId === panelDesc.id) {
-            return;
+            return cb();
         }
 
         // Load the panel
@@ -136,6 +136,7 @@ define([
             }
             self._layoutManager.addPanel('activePanel', panel, 'center');
             self._activePanel = panel;
+            self._activePanelId = panelDesc.id;
             cb();
         });
 
