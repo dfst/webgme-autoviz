@@ -9,12 +9,14 @@ define([
     'js/Constants',
     'js/RegistryKeys',
     'js/PanelBase/PanelBase',
+    'js/Utils/ComponentSettings',
     'text!/api/visualizers'
 ], function (
     Logger,
     CONSTANTS,
     REGISTRY_KEYS,
     PanelBase,
+    ComponentSettings,
     VisualizersJSON
 ) {
     'use strict';
@@ -46,10 +48,36 @@ define([
         this._client = params.client;
         PanelBase.call(this, params);
 
+        this.config = {
+            preloadIds: []
+        };
+        ComponentSettings.resolveWithWebGMEGlobal(this.config, AutoVizPanel.getComponentId());
+        this.preloadId = 0;
+
         //initialize event handlers
         this._initialize();
+        this.preloadNext();
 
         this.logger.debug('ctor finished');
+    };
+
+    AutoVizPanel.getComponentId = function() {
+        return 'AutoViz';
+    };
+
+    AutoVizPanel.prototype.preloadNext = function() {
+        var panelId,
+            panelIndex = -1;
+
+        // Load the next visualizer id
+        while (this.preloadId < this.config.preloadIds.length && panelIndex === -1) {
+            panelId = this.config.preloadIds[this.preloadId++];
+            panelIndex = VisualizerIds.indexOf(panelId);
+        }
+
+        if (panelIndex !== -1) {
+            this.getPanel(VisualizersJSON[panelIndex].panel, this.preloadNext.bind(this));
+        }
     };
 
     AutoVizPanel.prototype._initialize = function() {
@@ -147,12 +175,11 @@ define([
         var self = this;
 
         if (this._panels[panelPath]) {
-            callback(this._panels[panelPath]);
+            callback(new this._panels[panelPath](this._layoutManager, this._params));
         } else {
             require([panelPath], function (PanelClass) {
-                var nodeId = self.currentNode.getId(),
-                    panel = new PanelClass(self._layoutManager, self._params);
-
+                var panel = new PanelClass(self._layoutManager, self._params);
+                self._panels[panelPath] = PanelClass;
                 callback(panel);
             },
             function(err) {
