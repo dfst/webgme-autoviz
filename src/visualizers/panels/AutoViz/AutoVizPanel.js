@@ -148,9 +148,7 @@ define([
     };
 
     AutoVizPanel.prototype.setPanel = function(panelDesc, cb) {
-        var panel,
-            self = this,
-            containerSize;
+        var self = this;
 
         if (this._activePanelId === panelDesc.id) {
             return cb();
@@ -183,7 +181,7 @@ define([
                 callback(panel);
             },
             function(err) {
-                self.logger.debug('Failed to download "' + err.requireModules[0] + '"');
+                self.logger.error('Failed to download "' + err.requireModules[0] + '"');
             });
 
         }
@@ -199,31 +197,31 @@ define([
 
     // Pass through functions
     AutoVizPanel.prototype.setSize = function() {
-        return this._forwardFn.call(this, 'setSize', arguments);
+        return this._forwardFn('setSize', arguments);
     };
 
     AutoVizPanel.prototype.destroy = function() {
-        return this._forwardFn.call(this, 'destroy', arguments);
+        return this._forwardFn('destroy', arguments);
     };
 
     AutoVizPanel.prototype.clear = function() {
-        return this._forwardFn.call(this, 'clear', arguments);
+        return this._forwardFn('clear', arguments);
     };
 
     AutoVizPanel.prototype.setReadOnly = function() {
-        return this._forwardFn.call(this, 'setReadOnly', arguments);
+        return this._forwardFn('setReadOnly', arguments);
     };
 
     AutoVizPanel.prototype.isReadOnly = function() {
-        return this._forwardFn.call(this, 'isReadOnly', arguments);
+        return this._forwardFn('isReadOnly', arguments);
     };
 
     AutoVizPanel.prototype.onReadOnlyChanged = function() {
-        return this._forwardFn.call(this, 'onReadOnlyChanged', arguments);
+        return this._forwardFn('onReadOnlyChanged', arguments);
     };
 
     AutoVizPanel.prototype.afterAppend = function() {
-        return this._forwardFn.call(this, 'afterAppend', arguments);
+        return this._forwardFn('afterAppend', arguments);
     };
 
     return AutoVizPanel;
