@@ -82,7 +82,11 @@ define([
 
     AutoVizPanel.prototype._initialize = function() {
         WebGMEGlobal.State.on('change:' + CONSTANTS.STATE_ACTIVE_OBJECT,
-            (model, id) => this.selectedObjectChanged(id));
+            (model, id) => {
+                if (!this.currentNode || this.currentNode.getId() !== id) {
+                    this.selectedObjectChanged(id);
+                }
+            });
 
         this._defaultPanelIndex = 0;
         for (var i = VisualizersJSON.length; i--;) {
