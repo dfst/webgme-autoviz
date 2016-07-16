@@ -34,6 +34,10 @@ define([
     // It is very similar to the "Visualizer" in the core WebGME library
     // except it is completely UI-less
     AutoVizPanel = function (layoutManager, params) {
+        var options = {};
+        options[PanelBase.OPTIONS.LOGGER_INSTANCE_NAME] = 'AutoViz';
+        PanelBase.call(this, options);
+
         this._layoutManager = layoutManager;
         this._params = params;
         // Add setting for embedded behavior
@@ -41,12 +45,12 @@ define([
 
         this._activePanel = null;
         this._activePanelId = null;
+        this._activeProject = null;
         this.currentNode = null;
         this._panels = {};
 
         this._territoryId = null;
         this._client = params.client;
-        PanelBase.call(this, params);
 
         this.config = {
             preloadIds: []
@@ -83,8 +87,17 @@ define([
     AutoVizPanel.prototype._initialize = function() {
         WebGMEGlobal.State.on('change:' + CONSTANTS.STATE_ACTIVE_OBJECT,
             (model, id) => {
-                if (!this.currentNode || this.currentNode.getId() !== id) {
+                var currentProject = this._client.getActiveProjectName(),
+                    refresh = this._activeProject !== currentProject ||
+                        !this.currentNode || this.currentNode.getId() !== id;
+
+                if (refresh) {
+                    if (this._activeProject !== currentProject) {
+                        this.logger.debug(`Project changed: ${this._activeProject} -> ${currentProject}`);
+                    }
+                    this.logger.debug(`Loading node "${id}"`);
                     this.selectedObjectChanged(id);
+                    this._activeProject = currentProject;
                 }
             });
 
@@ -104,12 +117,14 @@ define([
 
         if (typeof nodeId === 'string') {
             this._territoryId = this._client.addUI(this, events => {
+                this.logger.debug(`Received ${events.length} events`);
                 this._eventCallback(events);
             });
             this.logger.debug(`AutoViz current territory id is ${this._territoryId}`);
 
             this._selfPatterns = {};
             this._selfPatterns[nodeId] = this.TERRITORY_RULE;
+            this.logger.debug(`updating territory: ${JSON.stringify(this._selfPatterns)}`);
             this._client.updateTerritory(this._territoryId, this._selfPatterns);
         }
     };
@@ -120,6 +135,7 @@ define([
             newNode;
 
         if (event) {
+            this.logger.info(`received event for node "${currentId}"`);
             newNode = this._client.getNode(currentId);
             if (!this.currentNode || this.currentNode !== newNode) {
                 this.currentNode = newNode;
@@ -143,9 +159,11 @@ define([
             panelIndex = this._defaultPanelIndex;
         }
 
+        this.logger.info(`setting active panel to ${panelId}`);
         this.setPanel(VisualizersJSON[panelIndex], () => {
             if (this._activePanel.control &&
                 this._activePanel.control.selectedObjectChanged) {
+                this.logger.info('invoking selectedObjectChanged on active panel');
                 this._activePanel.control.selectedObjectChanged(this.currentNode.getId());
             }
         });
