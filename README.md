@@ -1,3 +1,4 @@
+[![Version](https://badge.fury.io/js/webgme-autoviz.svg)](https://www.npmjs.com/package/webgme-autoviz)
 [![Code Climate](https://codeclimate.com/github/dfst/webgme-autoviz/badges/gpa.svg)](https://codeclimate.com/github/dfst/webgme-autoviz)
 
 # webgme-autoviz
