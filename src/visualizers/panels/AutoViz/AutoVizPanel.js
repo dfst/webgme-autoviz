@@ -177,6 +177,8 @@ define([
             }
             self._layoutManager.addPanel('activePanel', panel, 'center');
             self._activePanel = panel;
+            // set read only
+            self._activePanel.setReadOnly(self.isReadOnly());
             self._activePanelId = panelDesc.id;
             cb();
         });
@@ -223,20 +225,22 @@ define([
         return this._forwardFn('clear', arguments);
     };
 
+    AutoVizPanel.prototype.afterAppend = function() {
+        return this._forwardFn('afterAppend', arguments);
+    };
+
     AutoVizPanel.prototype.setReadOnly = function() {
+        PanelBase.prototype.setReadOnly.apply(this, arguments);
         return this._forwardFn('setReadOnly', arguments);
     };
 
     AutoVizPanel.prototype.isReadOnly = function() {
-        return this._forwardFn('isReadOnly', arguments);
+        return PanelBase.prototype.isReadOnly.apply(this, arguments);
     };
 
     AutoVizPanel.prototype.onReadOnlyChanged = function() {
+        PanelBase.prototype.onReadOnlyChanged.apply(this, arguments);
         return this._forwardFn('onReadOnlyChanged', arguments);
-    };
-
-    AutoVizPanel.prototype.afterAppend = function() {
-        return this._forwardFn('afterAppend', arguments);
     };
 
     return AutoVizPanel;
