@@ -170,7 +170,7 @@ define([
             baseType = base && base.getAttribute('name');
 
         // If currentNode is the root node, use "" as the baseType
-        if (!base && this.currentNode.getId() === CONSTANTS.PROJECT_ROOT_ID) {
+        if (this.currentNode.getId() === CONSTANTS.PROJECT_ROOT_ID) {
             baseType = '';
         }
 
