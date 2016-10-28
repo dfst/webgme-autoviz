@@ -50,7 +50,8 @@ define([
         this._client = params.client;
 
         this.config = {
-            preloadIds: []
+            preloadIds: [],
+            visualizerOverrides: {}
         };
         ComponentSettings.resolveWithWebGMEGlobal(this.config, AutoVizPanel.getComponentId());
         this.preloadId = 0;
@@ -146,9 +147,7 @@ define([
         var panelId,
             panelIndex;
 
-        panelId = (this.currentNode.getRegistry(REGISTRY_KEYS.VALID_VISUALIZERS) || '')
-            .split(' ')
-            .shift();
+        panelId = this.getPanelId();
 
         // If the panel id does not exist or is undefined, set it to the defaultId
         panelIndex = VisualizerIds.indexOf(panelId);
@@ -164,6 +163,19 @@ define([
                 this._activePanel.control.selectedObjectChanged(this.currentNode.getId());
             }
         });
+    };
+
+    AutoVizPanel.prototype.getPanelId = function() {
+        var base = this._client.getNode(this.currentNode.getMetaTypeId()),
+            baseType = base && base.getAttribute('name');
+
+        if (baseType && this.config.visualizerOverrides[baseType]) {
+            return this.config.visualizerOverrides[baseType];
+        }
+
+        return (this.currentNode.getRegistry(REGISTRY_KEYS.VALID_VISUALIZERS) || '')
+            .split(' ')
+            .shift();
     };
 
     AutoVizPanel.prototype.setPanel = function(panelDesc, cb) {
