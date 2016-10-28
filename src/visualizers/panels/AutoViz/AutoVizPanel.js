@@ -169,7 +169,12 @@ define([
         var base = this._client.getNode(this.currentNode.getMetaTypeId()),
             baseType = base && base.getAttribute('name');
 
-        if (baseType && this.config.visualizerOverrides[baseType]) {
+        // If currentNode is the root node, use "" as the baseType
+        if (!base && this.currentNode.getId() === CONSTANTS.PROJECT_ROOT_ID) {
+            baseType = '';
+        }
+
+        if (this.config.visualizerOverrides[baseType]) {
             return this.config.visualizerOverrides[baseType];
         }
 
