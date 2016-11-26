@@ -187,11 +187,12 @@ define([
         var self = this;
 
         // Load the panel
-        this.getPanel(panelDesc.panel, function(panel) {
+        this.getPanel(panelDesc.panel, function(PanelClass) {
             if (self._activePanel) {
                 self._activePanel.destroy();
                 self._activePanel.$pEl.remove();
             }
+            var panel = new PanelClass(self._layoutManager, self._params);
             self._layoutManager.addPanel('activePanel', panel, 'center');
             self._activePanel = panel;
             // set read only
@@ -207,12 +208,11 @@ define([
         var self = this;
 
         if (this._panels[panelPath]) {
-            callback(new this._panels[panelPath](this._layoutManager, this._params));
+            callback(this._panels[panelPath]);
         } else {
             require([panelPath], function (PanelClass) {
-                var panel = new PanelClass(self._layoutManager, self._params);
                 self._panels[panelPath] = PanelClass;
-                callback(panel);
+                callback(PanelClass);
             },
             function(err) {
                 self.logger.error('Failed to download "' + err.requireModules[0] + '"');
