@@ -186,6 +186,10 @@ define([
     AutoVizPanel.prototype.setPanel = function(panelDesc, cb) {
         var self = this;
 
+        if (panelDesc.id === this._activePanelId) {
+            return cb();
+        }
+
         // Load the panel
         this.getPanel(panelDesc.panel, function(PanelClass) {
             if (self._activePanel) {
